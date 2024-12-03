@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Generation and Verification</title>
+    <!-- Bootstrap and Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { max-width: 500px; }
+        .card { border: none; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+        .btn { height: 50px; }
+        .otp-input { width: 100%; height: 60px; font-size: 24px; text-align: center; border: 2px solid #198754; border-radius: 5px; }
+        .text-success-icon { font-size: 5rem; }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Home Page -->
+        <div id="home-page" class="card p-4">
+            <div class="text-center mb-4">
+                <i class="fas fa-home text-success text-success-icon"></i>
+                <h2>Welcome</h2>
+                <p class="text-muted">Choose an option below:</p>
+            </div>
+            <button id="signup-option" class="btn btn-primary w-100 mb-3">Newly Sign Up Account</button>
+            <button id="login-option" class="btn btn-secondary w-100">Login with Verification</button>
+            <button id="admin-view" class="btn btn-info w-100 mb-3">View System Overview</button>
+        </div>
+    <!-- Sign-Up Page -->
+<div id="page-1" class="card p-4">
+    <div class="text-center mb-4">
+        <i class="fas fa-user-circle text-success text-success-icon"></i>
+        <h2>Create an Account</h2>
+        <p class="text-muted">Enter your details to create an account</p>
+    </div>
+    <input type="text" id="name" class="form-control mb-3" placeholder="Name" required />
+    <input type="text" id="username" class="form-control mb-3" placeholder="Username" required />
+    <input type="email" id="signup-email" class="form-control mb-3" placeholder="Email" required />
+    <input type="password" id="password" class="form-control mb-3" placeholder="Password" required />
+    <button id="register-user" class="btn btn-success w-100">Sign Up</button>
+</div>
+
+    <div class="container p-5">
+        <!-- OTP Generation Page -->
+        <div id="page-2" class="card p-4">
+            <div class="text-center mb-4">
+                <i class="fas fa-envelope-circle-check text-success text-success-icon"></i>
+                <h2>OTP Generator</h2>
+                <p class="text-muted">Enter your email to receive an OTP</p>
+            </div>
+            <input type="email" id="email" class="form-control mb-3" placeholder="Enter your email" required />
+            <button id="generate-otp" class="btn btn-success w-100">Generate OTP</button>
+        </div>
+
+        <!-- OTP Verification Page -->
+        <div id="page-3" class="card p-4" style="display: none;">
+            <div class="text-center mb-4">
+                <i class="fas fa-key text-success text-success-icon"></i>
+                <h2>OTP Verification</h2>
+                <p class="text-muted">Please enter the OTP sent to your email</p>
+            </div>
+            <div class="otp-input-group d-flex justify-content-center">
+                <input type="text" id="otp-input" class="otp-input" maxlength="6" placeholder="••••••" />
+            </div>
+            <button id="verify-otp" class="btn btn-primary w-100 mt-4">Verify OTP</button>
+            <p id="verification-result" class="text-center text-muted mt-3">Verification result will appear here</p>
+        </div>
+    </div>
+    <!-- Add this page to list OTPs and users -->
+<div id="admin-page" class="card p-4" style="display: none;">
+    <div class="text-center mb-4">
+        <h2>System Overview</h2>
+        <p class="text-muted">List of all OTPs and registered users</p>
+    </div>
+    <div>
+        <h3>Generated OTPs</h3>
+        <table id="otp-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Account</th>
+                    <th>OTP</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div>
+        <h3>Registered Users</h3>
+        <table id="user-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <button id="back-home" class="btn btn-secondary">Back to Home</button>
+</div>
+
+     <!-- where React app will be rendered -->
+  <div id="root"></div>
+
+    <!-- Load Web3.js and Custom JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+
+    <script>
+
+        function showPage(pageId) {
+        const pages = ['home-page', 'page-1', 'page-2', 'page-3', 'admin-page'];
+        pages.forEach(page => {
+        const element = document.getElementById(page);
+        if (element) {
+         element.style.display = page === pageId ? 'block' : 'none';
+         console.log(`Page '${page}' is now ${page === pageId ? 'visible' : 'hidden'}.`);
+           } else {
+        console.error(`Page '${page}' not found.`);
+        }
+        });
+        }
+
+    
+        
+
+    
+        document.getElementById('signup-option').addEventListener('click', () => {
+            showPage('page-1');
+        });
+    
+        document.getElementById('login-option').addEventListener('click', () => {
+            showPage('page-2');
+        });
+    
+        document.getElementById('register-user').addEventListener('click', () => {
+            alert("Account created successfully!");
+            showPage('home-page');
+        });
+    
+        document.getElementById('generate-otp').addEventListener('click', async () => {
+  console.log("Generate OTP button clicked.");
+  try {
+    const success = await generateOtp();
+
+    if (success) {
+      console.log("OTP generated successfully.");
+      showPage('page-3'); // Switch to OTP verification page
+    } else {
+      console.error("Failed to generate OTP.");
+      alert("Failed to generate OTP. Please try again.");
+    }
+  } catch (error) {
+    console.error("Error during OTP generation:", error);
+    alert("An error occurred while generating OTP. Please try again.");
+  }
+});
+
+
+    
+        document.getElementById('verify-otp').addEventListener('click', () => {
+           const otpInput = document.getElementById('otp-input').value;
+           console.log("Verifying OTP:", otpInput);
+ 
+            // Render React's verification function
+           if (window.verifyOtp) {
+           window.verifyOtp();
+          } else {
+             console.error("verifyOtp function is not available in React app.");
+           }
+          });
+
+          document.getElementById('admin-view').addEventListener('click', () => {
+  if (!contract || !authenticateContract || !account) {
+    alert("Contracts or account not initialized yet. Please wait and try again.");
+    return;
+  }
+  showPage('admin-page');
+  fetchSystemData();
+});
+
+
+          document.getElementById('back-home').addEventListener('click', () => {
+    showPage('home-page');
+});
+
+
+    
+        // Initialize Home Page
+        showPage('home-page');
+    </script>
+    
+</body>
+</html>

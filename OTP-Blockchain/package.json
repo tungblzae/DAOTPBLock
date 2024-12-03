@@ -1,0 +1,64 @@
+{
+  "name": "otp-blockchain",
+  "version": "1.0.0",
+  "description": "OTP Blockchain Application",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate-contract-config": "node ./scripts/generateContractConfig.js",
+    "server": "node server.js",
+    "client": "npm run generate-contract-config && react-scripts start --cwd frontend",
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm run generate-contract-config && react-scripts build --cwd frontend"
+  },
+  "homepage": "./frontend/public",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/preset-react": "^7.25.9",
+    "@truffle/contract": "^4.6.31",
+    "assert": "^2.1.0",
+    "babel-loader": "^9.2.1",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.1",
+    "express": "^4.21.1",
+    "http-browserify": "^1.7.0",
+    "https-browserify": "^1.0.0",
+    "nodemailer": "^6.9.16",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "^5.0.1",
+    "stream-browserify": "^3.0.0",
+    "truffle": "^5.11.5",
+    "twilio": "^5.3.5",
+    "url": "^0.11.4",
+    "web3": "^4.13.0"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "concurrently": "^9.1.0",
+    "file-loader": "^6.2.0",
+    "react-app-rewired": "^2.2.1",
+    "source-map-loader": "^5.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://localhost:3001"
+}

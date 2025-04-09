@@ -23,6 +23,7 @@
     "@truffle/contract": "^4.6.31",
     "assert": "^2.1.0",
     "babel-loader": "^9.2.1",
+    "bn.js": "^5.2.1",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
     "express": "^4.21.1",
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "chai": "^5.2.0",
     "concurrently": "^9.1.0",
     "file-loader": "^6.2.0",
     "react-app-rewired": "^2.2.1",

@@ -9,7 +9,7 @@ contract OTPContract {
     }
 
     mapping(address => OTPInfo) public otpStorage;
-     address[] private otpAddresses; // Array to track addresses with OTPs
+    address[] private otpAddresses; // Array to track addresses with OTPs
     event OTPGenerated(address indexed user, uint otp, uint expiry);
     event OTPVerified(address indexed user, uint otp, bool success);
 
@@ -17,28 +17,33 @@ contract OTPContract {
 
     // Function to generate and store an OTP
     function generateOTP() public {
+        require(otpStorage[msg.sender].expiry < block.timestamp, "Existing OTP still valid");
         uint otp = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender, nonce))) % 1000000;
         
          // Ensure OTP is always a 6-digit string with leading zeros if needed
         string memory otpString = uintToString(otp);
 
         otpStorage[msg.sender] = OTPInfo(otp, block.timestamp + 300 seconds, otpString); // Set expiry to 300 seconds
+        otpAddresses.push(msg.sender);
+
         nonce++; // Increment nonce for the next OTP generation
 
         emit OTPGenerated(msg.sender, otp, block.timestamp + 300 seconds);
 
-        // Ensure the OTP was correctly stored
-        assert(otpStorage[msg.sender].otp == otp);
-        assert(otpStorage[msg.sender].expiry == block.timestamp + 300 seconds);
     }
 
     // Function to verify an OTP
-    function verifyOTP(uint _otp) public view returns (bool) {
-        OTPInfo memory info = otpStorage[msg.sender];
-        require(block.timestamp <= info.expiry, "OTP expired");
+    function verifyOTP(uint _otp) public returns (bool) {
+    OTPInfo storage info = otpStorage[msg.sender];
+    require(block.timestamp <= info.expiry, "OTP expired");
+    require(info.otp == _otp, "Invalid OTP");
 
-        return info.otp == _otp;
-    }
+    delete otpStorage[msg.sender]; // Remove OTP after successful verification
+
+    emit OTPVerified(msg.sender, _otp, true);
+    return true;
+}
+
     // Function to retrieve all addresses that have generated OTPs
     function getAllOTPAddresses() public view returns (address[] memory) {
         return otpAddresses;

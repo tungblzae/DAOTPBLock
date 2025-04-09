@@ -7,6 +7,7 @@
     <!-- Bootstrap and Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+    
     <style>
         body { background-color: #f8f9fa; }
         .container { max-width: 500px; }
@@ -14,7 +15,37 @@
         .btn { height: 50px; }
         .otp-input { width: 100%; height: 60px; font-size: 24px; text-align: center; border: 2px solid #198754; border-radius: 5px; }
         .text-success-icon { font-size: 5rem; }
-        
+        .notification {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: white;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-left: 5px solid #007bff;
+        font-family: Arial, sans-serif;
+    }
+    .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .notification i {
+        color: red;
+        font-size: 24px;
+    }
+    #close-notification {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
     </style>
 </head>
 <body>
@@ -44,33 +75,64 @@
     <button id="register-user" class="btn btn-success w-100">Sign Up</button>
 </div>
 
-    <div class="container p-5">
-        <!-- OTP Generation Page -->
-        <div id="page-2" class="card p-4">
-            <div class="text-center mb-4">
-                <i class="fas fa-envelope-circle-check text-success text-success-icon"></i>
-                <h2>OTP Generator</h2>
-                <p class="text-muted">Enter your email to receive an OTP</p>
-            </div>
-            <input type="email" id="email" class="form-control mb-3" placeholder="Enter your email" required />
-            <button id="generate-otp" class="btn btn-success w-100">Generate OTP</button>
+<!-- OTP Generation Page -->
+<div class="container">
+    <div id="page-2" class="card p-4">
+        <div class="text-center mb-4">
+            <i class="fas fa-key text-success text-success-icon"></i>
+            <h2>OTP Generator</h2>
+            <p class="text-muted">Click the button to generate your OTP.</p>
         </div>
-
-        <!-- OTP Verification Page -->
-        <div id="page-3" class="card p-4" style="display: none;">
-            <div class="text-center mb-4">
-                <i class="fas fa-key text-success text-success-icon"></i>
-                <h2>OTP Verification</h2>
-                <p class="text-muted">Please enter the OTP sent to your email</p>
-            </div>
-            <div class="otp-input-group d-flex justify-content-center">
-                <input type="text" id="otp-input" class="otp-input" maxlength="6" placeholder="••••••" />
-            </div>
-            <button id="verify-otp" class="btn btn-primary w-100 mt-4">Verify OTP</button>
-            <p id="verification-result" class="text-center text-muted mt-3">Verification result will appear here</p>
-        </div>
+        <button id="generate-otp" class="btn btn-success w-100">Generate OTP</button>
+        <p id="otp-display" class="otp-display text-center"></p> <!-- OTP Display Area -->
     </div>
-    <!-- Add this page to list OTPs and users -->
+
+    <!-- OTP Verification Page with 6 Input Boxes -->
+<div id="page-3" class="card p-4">
+    <div class="text-center mb-4">
+        <h2>OTP Verification</h2>
+        <p class="text-muted">Enter the 6-digit OTP below to verify.</p>
+    </div>
+    <div class="d-flex justify-content-center gap-2">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveToNext(this, 'otp2')" id="otp1">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveToNext(this, 'otp3')" id="otp2">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveToNext(this, 'otp4')" id="otp3">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveToNext(this, 'otp5')" id="otp4">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveToNext(this, 'otp6')" id="otp5">
+        <input type="text" class="otp-input" maxlength="1" id="otp6" oninput="moveToNext(this, null)">
+    </div>
+    <button id="verify-otp" class="btn btn-primary w-100 mt-3">Verify OTP</button>
+    <p id="verification-result" class="text-center text-muted mt-3"></p>
+</div>
+<!-- Notification Container -->
+<div id="notification-container" class="notification" style="display: none;">
+  <div class="notification-content">
+      <i class="fas fa-bell"></i>
+      <div>
+          <h4>OTP Generated</h4>
+          <p id="otp-message">Your OTP is: </p>
+      </div>
+      <button id="close-notification">OK</button>
+  </div>
+</div>
+<!--Verification Result-->
+<div id="success-page" style="display: none;">
+  <h2 style="color: green;">✅ OTP Verified Successfully!</h2>
+</div>
+
+<div id="failed-page" style="display: none;">
+  <h2 style="color: red;">❌ OTP Verification Failed!</h2>
+</div>
+<!-- Loading Notification Container -->
+<div id="loading-notification" class="notification" style="display: none; border-left-color: #007bff;">
+    <div class="notification-content">
+        <i class="fas fa-spinner fa-spin"></i>
+        <div id="loading-message">Loading...</div>
+        <!-- A close button if needed (hidden by default) -->
+        <button id="close-loading" style="display: none;">OK</button>
+    </div>
+  </div>
+    <!-- List OTPs and users -->
 <div id="admin-page" class="card p-4" style="display: none;">
     <div class="text-center mb-4">
         <h2>System Overview</h2>
@@ -111,9 +173,40 @@
 
     <!-- Load Web3.js and Custom JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
-
+     <!-- Add in head section of index.html -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-
+        // Connect to MetaMask when the page loads
+        window.addEventListener('load', async () => {
+          if (typeof window.ethereum !== 'undefined') {
+            console.log("MetaMask detected.");
+            try {
+              // Request account access if needed
+              await window.ethereum.request({ method: 'eth_requestAccounts' });
+              // Create a Web3 instance using MetaMask's provider
+              window.web3 = new Web3(window.ethereum);
+              const accounts = await window.web3.eth.getAccounts();
+              window.account = accounts[0];
+              console.log("Connected MetaMask account:", window.account);
+              // OPTIONAL: If you have a global initialization function (e.g., initWeb3AndContract from your React app),
+              // you can call it here to initialize your contract instances.
+            } catch (error) {
+              console.error("Error connecting to MetaMask:", error);
+            }
+          } else {
+            console.error("MetaMask not found! Please install MetaMask.");
+          }
+        }); </script>
+        <script>
+          document.addEventListener("otpNotification", function(event) {
+            const otpDisplayElem = document.getElementById("otp-display");
+            if (otpDisplayElem) {
+              otpDisplayElem.innerText = "Your OTP is: " + event.detail.otp;
+            }
+          });
+        </script>
+        
+        <script>
         function showPage(pageId) {
         const pages = ['home-page', 'page-1', 'page-2', 'page-3', 'admin-page'];
         pages.forEach(page => {
@@ -127,7 +220,50 @@
         });
         }
 
-    
+        function verifyOTP() {
+    let inputOTP = document.getElementById("otp-input").value; // Get user input
+    console.log("Verifying OTP with numeric value:", inputOTP);
+
+    if (inputOTP === generatedOTP) { // OTP is correct
+        console.log("Verification result: Success");
+        showNotification("✅ OTP Verified Successfully!", "green");
+        switchPage("success-page");
+    } else { // OTP is incorrect
+        console.log("Verification result: Failed");
+        showNotification("❌ OTP Verification Failed. Please try again.", "red");
+        switchPage("failed-page");
+    }
+}
+
+// Function to display notifications
+function showNotification(message, color) {
+    let notification = document.createElement("div");
+    notification.innerText = message;
+    notification.style.position = "fixed";
+    notification.style.bottom = "20px";
+    notification.style.right = "20px";
+    notification.style.padding = "15px 20px";
+    notification.style.backgroundColor = color;
+    notification.style.color = "white";
+    notification.style.fontSize = "16px";
+    notification.style.borderRadius = "5px";
+    notification.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.1)";
+    document.body.appendChild(notification);
+
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+//  **Function to Switch Pages Based on OTP Verification Result**
+function switchPage(pageId) {
+    document.getElementById("success-page").style.display = "none";
+    document.getElementById("failed-page").style.display = "none";
+
+    document.getElementById(pageId).style.display = "block";
+}
+
         
 
     
@@ -162,29 +298,65 @@
   }
 });
 
+function moveToNext(currentInput, nextInputId) {
+        if (currentInput.value.length === 1 && nextInputId) {
+            document.getElementById(nextInputId).focus();
+        }
+    }
 
-    
-        document.getElementById('verify-otp').addEventListener('click', () => {
-           const otpInput = document.getElementById('otp-input').value;
-           console.log("Verifying OTP:", otpInput);
- 
-            // Render React's verification function
-           if (window.verifyOtp) {
-           window.verifyOtp();
-          } else {
-             console.error("verifyOtp function is not available in React app.");
-           }
-          });
+    document.getElementById('verify-otp').addEventListener('click', () => {
+        const otp = Array.from({ length: 6 }, (_, i) => document.getElementById(`otp${i + 1}`).value).join('');
+        console.log("Entered OTP:", otp);
+        if (window.verifyOtp) {
+            window.verifyOtp(otp);
+        } else {
+            console.error("verifyOtp function not available");
+        }
+    });
 
-          document.getElementById('admin-view').addEventListener('click', () => {
+// Handle MetaMask errors
+document.getElementById('admin-view').addEventListener('click', () => {
   if (!contract || !authenticateContract || !account) {
-    alert("Contracts or account not initialized yet. Please wait and try again.");
+    alert("Please connect MetaMask first!");
     return;
   }
   showPage('admin-page');
   fetchSystemData();
 });
+document.addEventListener("loadingStatus", function(event) {
+    const loadingContainer = document.getElementById("loading-notification");
+    const loadingMessageElem = document.getElementById("loading-message");
+    if (loadingContainer && loadingMessageElem) {
+      const msg = event.detail.message;
+      if (msg && msg.trim() !== "") {
+        loadingMessageElem.innerText = msg;
+        loadingContainer.style.display = "flex";
+      } else {
+        loadingContainer.style.display = "none";
+      }
+    }
+  });
 
+// OTP Noti
+document.addEventListener("otpNotification", function(event) {
+    const otpMessageElem = document.getElementById("otp-message");
+    const notification = document.getElementById("notification-container");
+    const closeNotification = document.getElementById("close-notification");
+
+    if (otpMessageElem && notification) {
+        otpMessageElem.innerText = "Your OTP is: " + event.detail.otp;
+        notification.style.display = "flex";
+    } else {
+        console.error("OTP message or notification container not found.");
+    }
+
+    // Close notification on button click
+    if (closeNotification) {
+        closeNotification.addEventListener("click", function () {
+            notification.style.display = "none";
+        });
+    }
+});
 
           document.getElementById('back-home').addEventListener('click', () => {
     showPage('home-page');

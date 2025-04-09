@@ -21,3 +21,105 @@ button {
     cursor: pointer;
     margin-top: 10px;
 }
+.otp-input {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    text-align: center;
+    border: 2px solid #198754;
+    border-radius: 5px;
+}
+body { background-color: #f8f9fa; }
+.container { max-width: 500px; }
+.card { border: none; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+.btn { height: 50px; }
+.otp-input { width: 100%; height: 60px; font-size: 24px; text-align: center; border: 2px solid #198754; border-radius: 5px; }
+.text-success-icon { font-size: 5rem; }
+.notification {
+position: fixed;
+bottom: 20px;
+right: 20px;
+background: white;
+box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+border-radius: 10px;
+padding: 15px;
+display: flex;
+align-items: center;
+gap: 10px;
+border-left: 5px solid #007bff;
+font-family: Arial, sans-serif;
+}
+.notification-content {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.notification i {
+color: red;
+font-size: 24px;
+}
+#close-notification {
+background: #007bff;
+color: white;
+border: none;
+padding: 5px 10px;
+border-radius: 5px;
+cursor: pointer;
+}
+/* OTP Verification Layout Styles */
+
+.otp-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #4070f4;
+    padding: 40px 20px;
+    border-radius: 10px;
+    color: #fff;
+    max-width: 400px;
+    margin: 20px auto; /* center on the page */
+  }
+  
+  .otp-container header i {
+    font-size: 3rem;
+    margin-bottom: 10px;
+  }
+  
+  .otp-container h4 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .otp-container .input-field {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .otp-container .input-field input {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    text-align: center;
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #000000;
+  }
+  
+  .otp-container button {
+    background: #ffffff;
+    color: #4070f4;
+    font-size: 1rem;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .otp-container button:hover {
+    background: #e0e0e0;
+  }
+  

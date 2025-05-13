@@ -1,4 +1,3 @@
-// Updated server.js
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
@@ -15,6 +14,7 @@ app.post('/detect-fraud', (req, res) => {
   console.log("detect-fraud endpoint hit with body:", req.body);
   res.json({ fraud: false });
 });
+
 app.get('/OTPContract.json', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'contracts', 'OTPContract.json'));
 });
@@ -23,6 +23,24 @@ app.get('/Authenticate.json', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'contracts', 'Authenticate.json'));
 });
 
+// ⬇️ Add routes for pages
+const paths = [
+  '/login',
+  '/home',
+  '/signup',
+  '/otp-gen',
+  '/otp-verify',
+  '/buy-products',
+  '/admin',
+];
+
+paths.forEach(route => {
+  app.get(route, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+});
+
+// fallback (for anything else)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

@@ -32,6 +32,10 @@ contract OTPContract {
 
     }
 
+    function getOTP(address user) external view returns (uint) {
+        return otpStorage[user].otp;
+    }
+
     // Function to verify an OTP
     function verifyOTP(uint _otp) public returns (bool) {
     OTPInfo storage info = otpStorage[msg.sender];

@@ -47,6 +47,7 @@
     "chai": "^5.2.0",
     "concurrently": "^9.1.0",
     "file-loader": "^6.2.0",
+    "nock": "^14.0.4",
     "react-app-rewired": "^2.2.1",
     "source-map-loader": "^5.0.0"
   },

@@ -9,13 +9,100 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
     
     <style>
-        body { background-color: #f8f9fa; }
-        .container { max-width: 500px; }
-        .card { border: none; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-        .btn { height: 50px; }
-        .otp-input { width: 100%; height: 60px; font-size: 24px; text-align: center; border: 2px solid #198754; border-radius: 5px; }
-        .text-success-icon { font-size: 5rem; }
-        .notification {
+      /* General Layout */
+      html, body {
+        height: 100%;
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      }
+      
+      .container {
+        max-width: 500px;
+      }
+
+      /* ✅ Fix container width for admin page */
+      #admin-page .container {
+        max-width: 100%;
+        padding: 20px;
+      }
+      
+      .card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      }
+
+        /* ===============================
+   ADMIN PAGE: full-screen flexbox
+   =============================== */
+/* Full-screen, scrollable admin page */
+#admin-page {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: #f8f9fa;  /* match your existing bg */
+  overflow: auto;       /* scroll both axes if needed */
+  z-index: 999;         /* float above other pages */
+}
+
+
+
+      #otp-table, #user-table {
+        
+        width: 100%;
+        table-layout: auto;
+        margin: 20px 0;
+      }
+
+      #otp-table th, 
+      #user-table th {
+        white-space: nowrap; /* Prevent header wrapping */
+        padding: 12px 15px;
+        background: #f8f9fa;
+      }
+
+      #otp-table td, 
+      #user-table td {
+        padding: 10px 15px;
+        vertical-align: top;
+        border-bottom: 1px solid #dee2e6;
+      }
+      
+      /* Form and Buttons */
+      .form-control {
+        border-radius: 12px;
+        height: 50px;
+        margin-bottom: 15px;
+      }
+      
+      .btn {
+        border-radius: 12px;
+        height: 50px;
+        font-size: 16px;
+      }
+      
+      /* OTP Input Fields */
+      .otp-input {
+        flex: 1;
+        min-width: 48px;
+        max-width: 48px;
+        height: 60px;
+        font-size: 22px;
+        border: 2px solid #ced4da;
+        border-radius: 12px;
+        text-align: center;
+        transition: all 0.3s ease-in-out;
+        background-color: #fff;
+      }
+      
+      /* Large Success Icons */
+      .text-success-icon {
+        font-size: 5rem;
+      }
+      
+      /* Notification Box */
+      .notification {
         position: fixed;
         bottom: 20px;
         right: 20px;
@@ -28,41 +115,145 @@
         gap: 10px;
         border-left: 5px solid #007bff;
         font-family: Arial, sans-serif;
-    }
-    .notification-content {
+        z-index: 2000;
+      }
+      
+      .notification-content {
         display: flex;
         align-items: center;
         gap: 10px;
-    }
-    .notification i {
+      }
+      
+      .notification i {
         color: red;
         font-size: 24px;
-    }
-    #close-notification {
+      }
+      
+      #close-notification {
         background: #007bff;
         color: white;
         border: none;
         padding: 5px 10px;
         border-radius: 5px;
         cursor: pointer;
-    }
-    </style>
+      }
+      
+      /* Full Page Layouts */
+      .full-page {
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 0 20px;
+        min-height: 100%;
+        background: #f8f9fa;
+      }
+      
+      .full-page.active {
+        display: flex;
+      }
+      
+      /* Cart Styles */
+      #cart-dropdown {
+        background: #fff;
+        box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+        border-radius: 10px;
+        width: 250px;
+        padding: 15px;
+      }
+      
+      .cart-item {
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+      }
+      
+      /* Cart Button Area */
+      #cart-button, #user-info {
+        font-size: 18px;
+      }
+      
+      /* Responsive Layouts */
+      @media (max-width: 768px) {
+        .container {
+          max-width: 90%;
+        }
+      
+        #cart-button, #user-info {
+          font-size: 14px;
+        }
+      
+        .otp-input {
+          min-width: 38px;
+          max-width: 38px;
+          height: 50px;
+          font-size: 18px;
+        }
+      
+        .btn {
+          font-size: 14px;
+          height: 45px;
+        }
+      
+        .form-control {
+          height: 45px;
+        }
+      
+        .notification {
+          width: 90%;
+          right: 5%;
+          bottom: 10px;
+          padding: 10px;
+        }
+      
+        #cart-dropdown {
+          right: 10px;
+          top: 70px;
+          width: 90%;
+        }
+      }
+      #admin-page {
+          padding: 10px;
+        }
+        
+        #otp-table, #user-table {
+          min-width: 1200px; /* Wider minimum width for mobile */
+          font-size: 14px;
+        }
+
+        #otp-table th, 
+        #user-table th {
+          padding: 8px 10px;
+        }
+      </style>
+      
 </head>
 <body>
     <div class="container">
-        <!-- Home Page -->
-        <div id="home-page" class="card p-4">
+       <!-- LOGIN CREDENTIALS PAGE -->
+      <div id="login-credentials" class="card p-4 full-page">
+       <div class="text-center mb-4">
+        <h2>Sign In</h2>
+        <p class="text-muted">Enter your username & password</p>
+        </div>
+       <input type="text" id="cred-username" class="form-control mb-3" placeholder="Username" />
+       <input type="password" id="cred-password" class="form-control mb-3" placeholder="Password" />
+       <button id="signin-btn" class="btn btn-primary w-100">Sign In</button>
+      </div> 
+      <!-- Home Page -->
+        <div id="home-page" class="card p-4" style="display:none">
             <div class="text-center mb-4">
                 <i class="fas fa-home text-success text-success-icon"></i>
                 <h2>Welcome</h2>
                 <p class="text-muted">Choose an option below:</p>
             </div>
             <button id="signup-option" class="btn btn-primary w-100 mb-3">Newly Sign Up Account</button>
-            <button id="login-option" class="btn btn-secondary w-100">Login with Verification</button>
-            <button id="admin-view" class="btn btn-info w-100 mb-3">View System Overview</button>
+            <button id="login-option" class="btn btn-secondary w-100">Buying Product</button>
+            <button id="admin-view" class="btn btn-info w-100 mb-3">View System Overview(admin)</button>
         </div>
+  
+    
     <!-- Sign-Up Page -->
-<div id="page-1" class="card p-4">
+<div id="page-1" class="card p-4 ">
     <div class="text-center mb-4">
         <i class="fas fa-user-circle text-success text-success-icon"></i>
         <h2>Create an Account</h2>
@@ -74,21 +265,29 @@
     <input type="password" id="password" class="form-control mb-3" placeholder="Password" required />
     <button id="register-user" class="btn btn-success w-100">Sign Up</button>
 </div>
-
+<!-- SIGN IN PAGE-->
+<div id="signin-page" class="card p-4" style="display: none;">
+  <div class="text-center mb-4">
+    <h2>Sign In</h2>
+    <p class="text-muted">Enter your Username</p>
+  </div>
+  <input type="text" id="login-username" class="form-control" placeholder="Username" required>
+  <button id="request-otp" class="btn btn-primary w-100">Request OTP</button>
+</div>
 <!-- OTP Generation Page -->
 <div class="container">
-    <div id="page-2" class="card p-4">
+    <div id="page-2" class="card p-4 ">
         <div class="text-center mb-4">
             <i class="fas fa-key text-success text-success-icon"></i>
             <h2>OTP Generator</h2>
             <p class="text-muted">Click the button to generate your OTP.</p>
         </div>
         <button id="generate-otp" class="btn btn-success w-100">Generate OTP</button>
-        <p id="otp-display" class="otp-display text-center"></p> <!-- OTP Display Area -->
+        <p id="otp-display" class="otp-display text-center" style="display: none"></p> <!-- OTP Display Area -->
     </div>
 
     <!-- OTP Verification Page with 6 Input Boxes -->
-<div id="page-3" class="card p-4">
+<div id="page-3" class="card p-4 ">
     <div class="text-center mb-4">
         <h2>OTP Verification</h2>
         <p class="text-muted">Enter the 6-digit OTP below to verify.</p>
@@ -115,6 +314,74 @@
       <button id="close-notification">OK</button>
   </div>
 </div>
+<!-- BUY PRODUCTS PAGE -->
+<div id="buy-products" class="card p-4 full-page" style="display:none;">
+  <!-- 🧑‍💻 Top bar: user + cart -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div id="user-info" style="font-size: 18px;">
+      <i class="fas fa-user-circle"></i> <span id="user-name">Guest</span>
+    </div>
+
+    <div id="cart-button" style="cursor: pointer;">
+      <i class="fas fa-shopping-cart"></i>
+      <span id="cart-items-count">0 items</span> | 
+      <span id="cart-total-price">$0.00</span>
+    </div>
+
+    <div id="cart-dropdown" class="card p-2" style="position:absolute; right:20px; top:80px; display:none; width:250px; z-index:1000;">
+      <h5>🛒 Your Cart</h5>
+      <ul id="cart-list" style="list-style:none; padding:0;"></ul>
+    </div>
+  </div>
+
+  <!-- 🛒 Products Row -->
+  <div class="d-flex justify-content-between mb-3">
+    <!-- Product A -->
+    <div class="text-center" style="width:30%">
+      <img src="pic/car.jpg" alt="Product A" class="img-fluid mb-2" style="max-height:120px;">
+      <h5>Product A</h5>
+      <button class="btn btn-outline-primary w-100 product-btn" data-product="A">Buy A</button>
+    </div>
+
+    <!-- Product B -->
+    <div class="text-center" style="width:30%">
+      <img src="pic/car.jpg" alt="Product B" class="img-fluid mb-2" style="max-height:120px;">
+      <h5>Product B</h5>
+      <button class="btn btn-outline-primary w-100 product-btn" data-product="B">Buy B</button>
+    </div>
+
+    <!-- Product C -->
+    <div class="text-center" style="width:30%">
+      <img src="pic/car.jpg" alt="Product C" class="img-fluid mb-2" style="max-height:120px;">
+      <h5>Product C</h5>
+      <button class="btn btn-outline-primary w-100 product-btn" data-product="C">Buy C</button>
+    </div>
+  </div>
+</div>
+
+  <!-- PRODUCT CONFIRMATION -->
+  <div id="product-page" class="card p-4 full-page" style="display:none;">
+    <div class="text-center mb-4">
+      <h2>Confirm Purchase</h2>
+      <p id="confirm-text" class="text-muted"></p>
+    </div>
+    <button id="confirm-purchase" class="btn btn-success w-100 mb-2">
+      Yes, Buy
+    </button>
+    <button id="cancel-purchase" class="btn btn-outline-secondary w-100">
+      No, Take me back
+    </button>
+  </div>
+
+  <!-- PURCHASE SUCCESS -->
+  <div id="purchase-success" class="card p-4 full-page" style="display:none;">
+    <div class="text-center">
+      <h2 style="color:green;">✅ Purchase Complete!</h2>
+      <p>You bought <strong><span id="product-name"></span></strong>.</p>
+      <button id="back-home-2" class="btn btn-primary w-100">Back to Home</button>
+    </div>
+  </div>
+
 <!--Verification Result-->
 <div id="success-page" style="display: none;">
   <h2 style="color: green;">✅ OTP Verified Successfully!</h2>
@@ -133,7 +400,7 @@
     </div>
   </div>
     <!-- List OTPs and users -->
-<div id="admin-page" class="card p-4" style="display: none;">
+<div id="admin-page" class="card p-4 " style="display: none;">
     <div class="text-center mb-4">
         <h2>System Overview</h2>
         <p class="text-muted">List of all OTPs and registered users</p>
@@ -143,14 +410,19 @@
         <table id="otp-table" class="table table-striped">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Account</th>
-                    <th>OTP</th>
+                  <th>#</th>
+                  <th>Account (Username)</th>
+                  <th>OTP Code</th>
+                  <th>Time Generated</th>
+                  
+                  <th>Status</th>
                 </tr>
-            </thead>
+              </thead>
             <tbody></tbody>
         </table>
     </div>
+  
+    
     <div>
         <h3>Registered Users</h3>
         <table id="user-table" class="table table-striped">
@@ -188,8 +460,7 @@
               const accounts = await window.web3.eth.getAccounts();
               window.account = accounts[0];
               console.log("Connected MetaMask account:", window.account);
-              // OPTIONAL: If you have a global initialization function (e.g., initWeb3AndContract from your React app),
-              // you can call it here to initialize your contract instances.
+          
             } catch (error) {
               console.error("Error connecting to MetaMask:", error);
             }
@@ -207,33 +478,128 @@
         </script>
         
         <script>
-        function showPage(pageId) {
-        const pages = ['home-page', 'page-1', 'page-2', 'page-3', 'admin-page'];
-        pages.forEach(page => {
-        const element = document.getElementById(page);
-        if (element) {
-         element.style.display = page === pageId ? 'block' : 'none';
-         console.log(`Page '${page}' is now ${page === pageId ? 'visible' : 'hidden'}.`);
-           } else {
-        console.error(`Page '${page}' not found.`);
-        }
-        });
-        }
 
-        function verifyOTP() {
-    let inputOTP = document.getElementById("otp-input").value; // Get user input
-    console.log("Verifying OTP with numeric value:", inputOTP);
-
-    if (inputOTP === generatedOTP) { // OTP is correct
-        console.log("Verification result: Success");
-        showNotification("✅ OTP Verified Successfully!", "green");
-        switchPage("success-page");
-    } else { // OTP is incorrect
-        console.log("Verification result: Failed");
-        showNotification("❌ OTP Verification Failed. Please try again.", "red");
-        switchPage("failed-page");
+const PRODUCTS = {
+    A: {
+      label:    'Product A',
+      price:    10.00,
+      imgSrc:   'https://via.placeholder.com/60?text=A'    // replace with your real URL
+    },
+    B: {
+      label:    'Product B',
+      price:    10.00,
+      imgSrc:   'https://via.placeholder.com/60?text=B'
+    },
+    C: {
+      label:    'Product C',
+      price:    10.00,
+      imgSrc:   'https://via.placeholder.com/60?text=C'
     }
+  };
+
+  function showPage(pageId, push = true) {
+  const pages = [
+    'login-credentials', 'home-page', 'signin-page', 'product-page',
+    'page-1', 'page-2', 'page-3',
+    'notification-page', 'admin-page', 'purchase-success',
+    'buy-products',
+  ];
+
+  pages.forEach(page => {
+    const element = document.getElementById(page);
+    if (element) {
+      element.style.display = page === pageId ? 'block' : 'none';
+    }
+  });
+
+  // ✨ Update the URL (if needed)
+  if (push) {
+    let path = '/';
+    switch (pageId) {
+      case 'login-credentials': path = '/login'; break;
+      case 'home-page': path = '/home'; break;
+      case 'page-1': path = '/signup'; break;
+      case 'page-2': path = '/otp-gen'; break;
+      case 'page-3': path = '/otp-verify'; break;
+      case 'buy-products': path = '/buy-products'; break;
+      case 'admin-page': path = '/admin'; break;
+      default: path = '/';
+    }
+    history.pushState({}, '', path);
+  }
 }
+
+        let otpPurpose = null;
+        let currentUser = null;
+        let loginOtp = null;
+        let purchaseOtp = null;
+        let cartItemsCount = 0;
+        let cartTotalPrice = 0;
+        const PRODUCT_PRICE = 10.00; // USD per product
+        const SKIP_FRAUD_CHECK = true;    // flip to `false` in production
+        const cartButton = document.getElementById('cart-button');
+        const cartDropdown = document.getElementById('cart-dropdown');
+        const cartList = document.getElementById('cart-list');
+
+        document.getElementById('login-option').addEventListener('click', () => {
+        showPage('signin-page'); // Redirect to sign-in page
+        });
+
+        document.getElementById('request-otp').addEventListener('click', async () => {
+        const user = document.getElementById('login-username').value.trim();
+        if (!user) {
+         return alert('Please enter your username');
+         }
+    otpPurpose = 'login';
+    console.log('[request-otp] otpPurpose set to', otpPurpose, 'for user', user);
+    const success = await window.generateOtp();
+    console.log('[request-otp] window.generateOtp returned', success);
+
+    if (success) {
+      // Jump straight into OTP verification UI
+      showPage('page-3');
+      console.log('[request-otp] Navigated to page-3 (OTP Verification)');
+    } else {
+      // If something really went wrong, show an error but REMAIN on the sign-in screen
+      showNotification('Failed to generate OTP. Please try again.', 'red');
+      console.log('[request-otp] Staying on signin-page');
+    }
+  });
+
+  cartButton.addEventListener('click', () => {
+  if (cartDropdown.style.display === 'none') {
+    cartDropdown.style.display = 'block';
+  } else {
+    cartDropdown.style.display = 'none';
+  }
+});
+
+
+function updateCartSummary() {
+  const itemCount = cartList.children.length;
+  const totalPrice = itemCount * 10; // assume $10 per product
+  document.getElementById('cart-items-count').innerText = `${itemCount} items`;
+  document.getElementById('cart-total-price').innerText = `$${totalPrice.toFixed(2)}`;
+}
+
+function addToCart(productName) {
+  const cartList = document.getElementById('cart-list');
+  
+  const li = document.createElement('li');
+  li.className = "cart-item";   // <-- ✅ Add a class for styling
+  li.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center">
+      <span>${productName}</span>
+      <span>$10.00</span> 
+    </div>
+  `;
+  
+  cartList.appendChild(li);
+  updateCartSummary();
+}
+
+
+
 
 // Function to display notifications
 function showNotification(message, color) {
@@ -264,7 +630,33 @@ function switchPage(pageId) {
     document.getElementById(pageId).style.display = "block";
 }
 
-        
+let selectedProduct = null;
+
+// when a product is clicked:
+document.querySelectorAll('.product-btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    selectedProduct = e.target.dataset.product;
+    document.getElementById('confirm-text').innerText =
+      `Do you want to buy ${selectedProduct}?`;
+    showPage('product-page');
+  });
+});
+   
+document.getElementById('confirm-purchase').onclick = () => {
+  if (!currentUser) {
+    // not logged in → send them to sign-up
+    return showPage('page-1');
+  }
+  otpPurpose = 'purchase';
+  showPage('page-2');  // go to OTP gen
+};
+
+
+document.getElementById('cancel-purchase').addEventListener('click', () => {
+  showPage('home-page');
+});
+document.getElementById('back-home-2')
+        .addEventListener('click', () => showPage('home-page'));
 
     
         document.getElementById('signup-option').addEventListener('click', () => {
@@ -272,8 +664,10 @@ function switchPage(pageId) {
         });
     
         document.getElementById('login-option').addEventListener('click', () => {
-            showPage('page-2');
-        });
+  window.otpPurpose = 'login'; // Set purpose first
+  showPage('signin-page'); // Redirect to sign-in page
+});
+
     
         document.getElementById('register-user').addEventListener('click', () => {
             alert("Account created successfully!");
@@ -304,14 +698,55 @@ function moveToNext(currentInput, nextInputId) {
         }
     }
 
-    document.getElementById('verify-otp').addEventListener('click', () => {
-        const otp = Array.from({ length: 6 }, (_, i) => document.getElementById(`otp${i + 1}`).value).join('');
-        console.log("Entered OTP:", otp);
-        if (window.verifyOtp) {
-            window.verifyOtp(otp);
-        } else {
-            console.error("verifyOtp function not available");
+    document.getElementById('verify-otp').addEventListener('click', async () => {
+      const otp = Array.from({ length: 6 }, (_, i) =>
+        document.getElementById(`otp${i+1}`).value
+      ).join('');
+      console.log("Entered OTP:", otp);
+      if (window.verifyOtp) {
+        const success = await window.verifyOtp(otp);
+        if (!success) return showPage('home-page');
+        if (otpPurpose === 'login') {
+          showPage('buy-products');
+        } else if (otpPurpose === 'purchase') {
+           // ① actually purchase on-chain (calls addToCart inside)
+           if (window.purchaseProduct) {
+           await window.purchaseProduct(selectedProduct);
+           }
+
+          // ② show confirmation UI
+          document.getElementById('product-name').innerText = selectedProduct;
+          showPage('purchase-success');
+           window.otpPurpose = null;
+           showNotification(`🎉 Purchase successful for product ${selectedProduct}!`, 'green');
+
         }
+        const label = selectedProduct === 'A' ? 'Product A'
+                : selectedProduct === 'B' ? 'Product B'
+                : 'Product C';
+        addToCart(label);
+        
+        // 👉 Hide the OTP notification popup manually
+        const notification = document.getElementById("notification-container");
+        if (notification) notification.style.display = "none";
+        
+        // 👇 Clear all OTP inputs after verifying
+        for (let i = 1; i <= 6; i++) {
+        document.getElementById(`otp${i}`).value = '';
+       }
+      } else {
+        console.error("verifyOtp function not available");
+      }
+    });
+      // Purchase flow: select → confirm → OTP
+      document.querySelectorAll('.product-btn').forEach(btn=> btn.onclick = ()=>{
+      selectedProduct = btn.dataset.product;
+      document.getElementById('confirm-text').innerText = `Buy Product ${selectedProduct}?`;
+      showPage('product-page');
+    });
+    document.getElementById('confirm-purchase').addEventListener('click', () => {
+    window.otpPurpose = 'purchase';
+    showPage('page-2'); // OTP generation
     });
 
 // Handle MetaMask errors
@@ -336,36 +771,90 @@ document.addEventListener("loadingStatus", function(event) {
       }
     }
   });
+  // credentials‐screen login
+document.getElementById('signin-btn').addEventListener('click', async () => {
+  const u = document.getElementById('cred-username').value.trim();
+  const p = document.getElementById('cred-password').value;
+  if (!u || !p) return alert('Both username and password are required.');
+
+  console.log('[signin-btn] trying loginUser for', u);
+  const ok = await window.loginUser(u, p);
+  console.log('[signin-btn] loginUser returned', ok);
+  if (ok) {
+    showPage('home-page');
+  } else {
+    alert('Invalid credentials');
+  }
+});
 
 // OTP Noti
 document.addEventListener("otpNotification", function(event) {
-    const otpMessageElem = document.getElementById("otp-message");
-    const notification = document.getElementById("notification-container");
-    const closeNotification = document.getElementById("close-notification");
+  const otp = event.detail.otp;
+  const otpMessageElem = document.getElementById("otp-message");
+  const notification    = document.getElementById("notification-container");
+  const closeBtn        = document.getElementById("close-notification");
 
-    if (otpMessageElem && notification) {
-        otpMessageElem.innerText = "Your OTP is: " + event.detail.otp;
-        notification.style.display = "flex";
-    } else {
-        console.error("OTP message or notification container not found.");
-    }
+  if (!otpMessageElem || !notification) {
+    console.error("OTP message or notification container not found.");
+    return;
+  }
 
-    // Close notification on button click
-    if (closeNotification) {
-        closeNotification.addEventListener("click", function () {
-            notification.style.display = "none";
-        });
-    }
+  // 📢 Update the UI
+  otpMessageElem.innerText = `Your OTP is: ${otp}`;
+  notification.style.display = "flex";
+
+  // 🔄 Store by purpose
+  if (window.otpPurpose === "login") {
+    loginOtp = otp;
+  } else if (window.otpPurpose === "purchase") {
+    purchaseOtp = otp;
+  }
+
+  // ❎ Clean up on close
+  closeBtn.onclick = () => {
+    notification.style.display = "none";
+  };
 });
 
           document.getElementById('back-home').addEventListener('click', () => {
     showPage('home-page');
 });
 
+// Detect the current URL path and show correct page
+window.addEventListener('load', () => {
+  const path = window.location.pathname;
 
-    
-        // Initialize Home Page
-        showPage('home-page');
+  switch (path) {
+    case '/login':
+      showPage('login-credentials', false);
+      break;
+    case '/home':
+      showPage('home-page', false);
+      break;
+    case '/signup':
+      showPage('page-1', false);
+      break;
+    case '/otp-gen':
+      showPage('page-2', false);
+      break;
+    case '/otp-verify':
+      showPage('page-3', false);
+      break;
+    case '/buy-products':
+      showPage('buy-products', false);
+      break;
+    case '/admin':
+      showPage('admin-page', false);
+      break;
+    default:
+      showPage('login-credentials', false);
+  }
+});
+
+
+// Start on the credentials login screen
+showPage('login-credentials');
+
     </script>
     
 </body>

@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.16",
+    "chai-as-promised": "^8.0.1"
+  }
+}

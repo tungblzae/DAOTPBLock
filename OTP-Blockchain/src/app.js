@@ -9,7 +9,7 @@ const App = () => {
   const [account, setAccount] = useState(null);
   const [contract, setContract] = useState(null);
   const [authenticateContract, setAuthenticateContract] = useState(null);
-
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     const initWeb3AndContract = async () => {
@@ -17,6 +17,7 @@ const App = () => {
         document.dispatchEvent(new CustomEvent("loadingStatus", { detail: { message: "Initializing Web3 and contracts..." } }));
         if (window.ethereum) {
           const web3 = new Web3(window.ethereum);
+          window.web3 = web3; 
           await window.ethereum.request({ method: 'eth_requestAccounts' });
           const accounts = await web3.eth.getAccounts();
           //Chọn acount
@@ -48,9 +49,12 @@ const App = () => {
 
 
           // Initialize Authenticate Contract
-          const authResponse = await fetch('/Authenticate.json');
-          const authContractJSON = await authResponse.json();
+          const authResponse = await fetch("http://localhost:3001/Authenticate.json?" + new Date().getTime());
+         const authContractJSON = await authResponse.json();
           console.log("Authenticate networks:", authContractJSON.networks);
+          console.log("Authenticate JSON file loaded:", authContractJSON);
+          console.log("Current network ID as string:", networkIdStr);
+
           const authDeployedNetwork = authContractJSON.networks[networkIdStr];
           if (!authDeployedNetwork || !authDeployedNetwork.address) {
             console.error("Authenticate contract not deployed on network", networkIdStr);
@@ -72,79 +76,186 @@ const App = () => {
     initWeb3AndContract();
   }, []);
 
-  const generateOtp = async () => {
-    if (contract && account) {
-      try {
-        await contract.methods.generateOTP().send({
-          from: account,
-          gasPrice: '20000000000',
-          gas: 300000
-        });
-        const otpInfo = await contract.methods.otpStorage(account).call();
-        console.log(`Generated OTP: ${otpInfo.otpString}`);
-        setOtp(otpInfo.otpString);
+  useEffect(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      console.log("Persisted user loaded:", user);
+      setCurrentUser(user);
+      }
+  }, []);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      console.log("Persisted user loaded:", user);
+      setCurrentUser(user);
   
-        // Dispatch a custom event with the generated OTP.
-        document.dispatchEvent(new CustomEvent("otpNotification", { detail: { otp: otpInfo.otpString } }));
-        
-        return true;
-      } catch (error) {
-        console.error("Error generating OTP:", error);
+      // 🧑‍💻 Update username on screen
+      const userNameElem = document.getElementById('user-name');
+      if (userNameElem) {
+        userNameElem.innerText = user.username;
+      }
+    }
+  }, []);
+  
+
+  const generateOtp = async () => {
+    if (!contract || !account) return false;
+  
+    try {
+      // 1) Fire the transaction
+      await contract.methods.generateOTP().send({
+        from: account,
+        gas: 300_000,
+        gasPrice: "20000000000"
+      });
+  
+      // 2) Now call our new single-uint getter
+      const raw = await contract.methods.getOTP(account).call();
+      const otpString = raw.toString().padStart(6, "0");
+  
+      // 3) Update UI
+      console.log(`✅ Generated OTP: ${otpString}`);
+      setOtp(otpString);
+      document.dispatchEvent(new CustomEvent("otpNotification", {
+        detail: { otp: otpString }
+      }));
+  
+      return true;
+    } catch (err) {
+      console.error("❌ Error generating OTP:", err);
+      return false;
+    }
+  };
+  
+  
+  
+  
+  const purchaseProduct = async (prodId) => {
+    if (!authenticateContract || !account) return;
+  
+    try {
+      await authenticateContract.methods.purchaseProduct(prodId)
+        .send({ from: account });
+  
+      // ✅ Add to cart with friendly name
+      let productName = "";
+      if (prodId === "A") productName = "Product A";
+      else if (prodId === "B") productName = "Product B";
+      else if (prodId === "C") productName = "Product C";
+      else productName = `Product ${prodId}`;
+  
+      addToCart(productName);   // <-- This way cart shows "Product A" instead of just "A"
+    } catch (err) {
+      console.error("Error purchasing product:", err);
+      showNotification("❌ Purchase failed", "red");
+    }
+  };
+  
+  
+  useEffect(() => {
+    window.purchaseProduct = purchaseProduct;
+    // … and already have window.verifyOtp etc.
+  }, [authenticateContract, account]);
+  
+
+  
+ 
+// const verifyOtp = async (inputOtp) => {
+//   if (!contract || !account) {
+//     console.error("Contracts or account not initialized");
+//     return false;
+//   }
+
+//   try {
+//     // 1) Fraud check
+//     const fraudRes = await fetch("http://localhost:3001/detect-fraud", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({
+//         account,
+//         failedAttempts: 3,
+//         locationChange: 1,
+//         timeOfDay: new Date().getHours()
+//       })
+//     });
+//     const fraudJson = await fraudRes.json();
+//     if (fraudJson.fraud) {
+//       console.warn("🚨 Fraudulent OTP attempt detected");
+//       showNotification("🚨 Suspicious OTP activity detected! 🚨", "red");
+//       return false;
+//     }
+
+//     // 2) Verify on-chain
+//     const numericOtp = parseInt(inputOtp, 10);
+//     console.log("Verifying OTP:", numericOtp);
+//     await contract.methods.verifyOTP(numericOtp).send({
+//       from: account,
+//       gas: 300000,
+//       gasPrice: "20000000000"
+//     });
+
+//     // 3) Success
+//     showNotification("✅ OTP Verified Successfully!", "green");
+//     setOtp("");                     // clear UI state
+//     return true;
+
+//   } catch (err) {
+//     console.error("Error verifying OTP:", err);
+//     showNotification("❌ OTP Verification Failed. Please try again.", "red");
+//     return false;
+//   }
+// };
+
+//VERIFIED OTP KO CÓ UNLOCK AI CHẶN
+const verifyOtp = async (inputOtp) => {
+  if (!contract || !account) {
+    console.error("Contracts or account not initialized");
+    return false;
+  }
+
+  try {
+    // ⚠️ Skip the fraud API in dev/test
+    if (!SKIP_FRAUD_CHECK) {
+      const fraudRes = await fetch("http://localhost:3001/detect-fraud", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          account,
+          failedAttempts: 3,
+          locationChange: 1,
+          timeOfDay: new Date().getHours()
+        })
+      });
+      const fraudJson = await fraudRes.json();
+      if (fraudJson.fraud) {
+        console.warn("🚨 Fraudulent OTP attempt detected");
+        showNotification("🚨 Suspicious OTP activity detected! 🚨", "red");
         return false;
       }
     }
-  };
-  
-  
-  const verifyOtp = async (inputOtp) => {
-    if (contract && account) {
-      try {
-        // Call AI Fraud Detection API before verifying OTP
-        const response = await fetch("http://localhost:3001/detect-fraud", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-              account: account,
-              failedAttempts: 3,  // Example: Retrieve real failed attempts from backend
-              locationChange: 1,  // Example: Use IP-based location tracking
-              timeOfDay: new Date().getHours() // Get current hour
-          }),
-      });
 
-      const result = await response.json();
-      if (result.fraud === true) {
-          console.log("🚨 Fraudulent OTP attempt detected! 🚨");
-          showNotification("🚨 Suspicious OTP activity detected! 🚨", "red");
-          return false;
-      }
-        // Convert the input string to a number.
-        const numericOtp = parseInt(inputOtp, 10);
-        console.log("Verifying OTP with numeric value:", numericOtp);
-        await contract.methods.verifyOTP(numericOtp).send({
-          from: account,
-          gas: 300000,
-          gasPrice: '20000000000'
-        });
-        console.log("Verification result: Success");
-            showNotification("✅ OTP Verified Successfully!", "green"); // Green for success
-            // Clear the OTP from UI state so it vanishes.
-      setOtp('');
-      const otpDisplayElem = document.getElementById("otp-display");
-      if (otpDisplayElem) {
-        otpDisplayElem.innerText = "";
-      }
-      
-      //  navigate away from the OTP verification page.
-      showPage('home-page');
-            return true;
-        
-        } catch (error) {
-            console.error('Error verifying OTP:', error.message, error.data);
-            showNotification("❌ OTP Verification Failed. Please try again.", "red"); // Red for failure
-            return false;
-        }
-    }
-  };
+    // …the rest of your on-chain verify logic stays exactly the same…
+    const numericOtp = parseInt(inputOtp, 10);
+    await contract.methods.verifyOTP(numericOtp).send({
+      from: account,
+      gas: 300000,
+      gasPrice: "20000000000"
+    });
+
+    showNotification("✅ OTP Verified Successfully!", "green");
+    setOtp("");
+    return true;
+
+  } catch (err) {
+    console.error("Error verifying OTP:", err);
+    showNotification("❌ OTP Verification Failed. Please try again.", "red");
+    return false;
+  }
+};
+
   
 
   // Add to app.js
@@ -170,10 +281,82 @@ const registerUser = async (name, username, email, password) => {
     ).send({ from: account });
 
     console.log("User registered successfully");
+   // Persist the current account/user details in localStorage
+   const userData = { name, username, email, account };
+   localStorage.setItem("currentUser", JSON.stringify(userData));
   } catch (error) {
     console.error("Registration failed:", error);
   }
 };
+
+  // ➊ Simple loginUser for testing
+  const loginUser = async (username, password) => {
+    // hard-coded admin/123 for dev
+    if (username === 'admin' && password === '123') {
+      const userObj = { username, account };
+      setCurrentUser(userObj);
+      localStorage.setItem("currentUser", JSON.stringify(userObj));
+      return true;
+    }
+    // TODO: call your authenticateContract.login(...) here
+    return false;
+  };
+
+  // ➋ Expose it to your index.html script
+  useEffect(() => {
+    window.loginUser = loginUser;
+  }, [loginUser]);
+  async function fetchOtpAuditTrail() {
+    if (!contract) {
+      console.error("Contract not initialized");
+      return [];
+    }
+  
+    try {
+      const generatedEvents = await contract.getPastEvents("OTPGenerated", {
+        fromBlock: 0,
+        toBlock: "latest",
+      });
+  
+      const verifiedEvents = await contract.getPastEvents("OTPVerified", {
+        fromBlock: 0,
+        toBlock: "latest",
+      });
+  
+      const logs = [];
+  
+      generatedEvents.forEach(evt => {
+        logs.push({
+          type: "Generated",
+          user: evt.returnValues.user,
+          otp: evt.returnValues.otp,
+          expiry: new Date(evt.returnValues.expiry * 1000).toLocaleString(),
+          blockNumber: evt.blockNumber
+        });
+      });
+  
+      verifiedEvents.forEach(evt => {
+        logs.push({
+          type: "Verified",
+          user: evt.returnValues.user,
+          otp: evt.returnValues.otp,
+          success: evt.returnValues.success,
+          blockNumber: evt.blockNumber
+        });
+      });
+  
+      // Sort logs by blockNumber (blockchain ordering)
+      logs.sort((a, b) => a.blockNumber - b.blockNumber);
+  
+      console.log("🔎 OTP Audit Trail:", logs);
+      return logs;
+  
+    } catch (error) {
+      console.error("Error fetching OTP audit trail:", error);
+      return [];
+    }
+  }
+  
 
   const fetchSystemData = async () => {
     try {
@@ -182,65 +365,132 @@ const registerUser = async (name, username, email, password) => {
         return;
       }
   
-      console.log("Fetching OTPs...");
-      // Fetch OTPs from the smart contract
-      const otpAddresses = await contract.methods.getAllOTPAddresses().call();
-      console.log("OTP Addresses:", otpAddresses);
+      // 1) Fetch both event streams in parallel
+      const [genEvents, verEvents] = await Promise.all([
+        contract.getPastEvents("OTPGenerated", { fromBlock: 0, toBlock: "latest" }),
+        contract.getPastEvents("OTPVerified",  { fromBlock: 0, toBlock: "latest" })
+      ]);
   
-      const otpList = [];
-      for (let i = 0; i < otpAddresses.length; i++) {
-        const otpData = await contract.methods.otpStorage(otpAddresses[i]).call();
-        console.log(`OTP Data [${i}]:`, otpData);
-        otpList.push({ ...otpData, address: otpAddresses[i] });
-      }
+      // 2) Map OTPGenerated → log entries
+      const genLogs = await Promise.all(genEvents.map(async (evt) => {
+        const { user, otp, expiry } = evt.returnValues;
+        // Convert expiry safely from BigInt/string → Number
+        const expiryTs = Number(expiry.toString());
+        const isExpired = expiryTs < Math.floor(Date.now() / 1000);
   
-      // Update OTP table
-      const otpTableBody = document.querySelector("#otp-table tbody");
-      otpTableBody.innerHTML = ""; // Clear previous rows
+        // Grab on-chain block timestamp
+        const blk = await window.web3.eth.getBlock(evt.blockNumber);
+        const ts  = Number(blk.timestamp);               // BigInt → Number
+        const time = new Date(ts * 1000).toLocaleString();
   
-      otpList.forEach((otp, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${otp.address}</td>
-          <td>${otp.otpString}</td>
-        `;
-        otpTableBody.appendChild(row);
+        // Look up the username
+        const userData = await authenticateContract.methods.users(user).call();
+        const username = userData.username || user;
+  
+        return {
+          username,
+          code:    otp.toString().padStart(6, "0"),
+          time,
+          status:  isExpired ? "Expired" : "Generated",
+          bn:      evt.blockNumber
+        };
+      }));
+  
+      // 3) Map OTPVerified → log entries
+      const verLogs = await Promise.all(verEvents.map(async (evt) => {
+        const { user, otp, success } = evt.returnValues;
+  
+        const blk = await window.web3.eth.getBlock(evt.blockNumber);
+        const ts  = Number(blk.timestamp);
+        const time = new Date(ts * 1000).toLocaleString();
+  
+        const userData = await authenticateContract.methods.users(user).call();
+        const username = userData.username || user;
+  
+        return {
+          username,
+          code:    otp.toString().padStart(6, "0"),
+          time,
+          status:  success ? "Verified" : "Failed",
+          bn:      evt.blockNumber
+        };
+      }));
+  
+      // 4) Merge & sort WITHOUT using BigInt subtraction
+      const allLogs = [...genLogs, ...verLogs].sort((a, b) => {
+        if (a.bn < b.bn) return -1;
+        if (a.bn > b.bn) return  1;
+        return 0;
       });
   
-      console.log("Fetching Users...");
-      // Fetch users from the Authenticate contract
-      const userAddresses = await authenticateContract.methods.getAllUserAddresses().call();
-      console.log("User Addresses:", userAddresses);
-  
-      const userList = [];
-      for (let i = 0; i < userAddresses.length; i++) {
-        const userData = await authenticateContract.methods.users(userAddresses[i]).call();
-        console.log(`User Data [${i}]:`, userData);
-        userList.push(userData);
-      }
-  
-      // Update Users table
-      const userTableBody = document.querySelector("#user-table tbody");
-      userTableBody.innerHTML = ""; // Clear previous rows
-  
-      userList.forEach((user, index) => {
+      // 5) Render your 5-column table
+      const tbody = document.querySelector("#otp-table tbody");
+      tbody.innerHTML = "";
+      allLogs.forEach((log, i) => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${user.name}</td>
-          <td>${user.username}</td>
-          <td>${user.email}</td>
+          <td>${i + 1}</td>
+          <td>${log.username}</td>
+          <td>${log.code}</td>
+          <td>${log.time}</td>
+          <td>${log.status}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+    console.log("Fetching registered users...");
+    const userAddresses = await authenticateContract.methods.getAllUserAddresses().call();
+    console.log("Total users:", userAddresses.length);
+    
+    const userTableBody = document.querySelector("#user-table tbody");
+    userTableBody.innerHTML = "";
+    
+    if (userAddresses.length === 0) {
+      // Fallback: use localStorage currentUser if present
+      const stored = localStorage.getItem("currentUser");
+      if (stored) {
+        const u = JSON.parse(stored);
+        userTableBody.innerHTML = `
+          <tr>
+            <td>1</td>
+            <td>${u.name     || "N/A"}</td>
+            <td>${u.username|| "N/A"}</td>
+            <td>${u.email   || "N/A"}</td>
+          </tr>
+        `;
+      } else {
+        userTableBody.innerHTML = `
+          <tr><td colspan="4" class="text-center">No registered users found</td></tr>
+        `;
+      }
+    } else {
+      // Real on-chain loop
+      for (let i = 0; i < userAddresses.length; i++) {
+        const addr = userAddresses[i];
+        const userData = await authenticateContract.methods.users(addr).call();
+        console.log("Raw user data:", userData);
+
+        const name     = userData.name     || "N/A";
+        const username = userData.username || addr;
+        const email    = userData.email    || "N/A";
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${name}</td>
+          <td>${username}</td>
+          <td>${email}</td>
         `;
         userTableBody.appendChild(row);
-      });
-  
-      console.log("System data fetched and tables updated.");
-  
-    } catch (error) {
-      console.error("Error fetching system data:", error);
+      }
     }
-  };
+
+    console.log("System overview loaded.");
+  } catch (error) {
+    console.error("Error fetching system data:", error);
+  }
+};
+
   
   const checkExistingOtp = async () => {
     if (contract && account) {
@@ -265,7 +515,10 @@ const registerUser = async (name, username, email, password) => {
     window.generateOtp = generateOtp;
     window.verifyOtp = verifyOtp;
     window.fetchSystemData = fetchSystemData; 
-  }, [registerUser, generateOtp, verifyOtp, fetchSystemData]);
+    window.contract = contract;
+    window.authenticateContract = authenticateContract;
+    window.account = account;
+  }, [registerUser, generateOtp, verifyOtp, fetchSystemData, contract, authenticateContract, account]);
   // LOG STATE
   useEffect(() => {
     const initContracts = async () => {
